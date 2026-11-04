@@ -12,5 +12,6 @@
   "requirements": [
     "pycryptodome>=3.20.0"
   ],
-  "version": "1.0.1"
+  "version": "1.0.2-beta.1",
+  "issue_tracker": "https://github.com/palashkaria/atomberg-lock/issues"
 }
