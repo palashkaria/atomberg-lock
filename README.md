@@ -228,9 +228,11 @@ access until those tests pass. No timed PIN support is implied.
 Development branches:
 
 - `tools/ios-capture-analysis`: standalone capture analyser, no runtime changes.
-- `feat/remote-otp-pool`: read action, based directly on upstream main.
+- `feat/remote-otp-pool`: read action, based on the tools branch.
 - `feat/otp-refill`: refill action, based on `feat/remote-otp-pool`.
 
-The refill PR will depend on the pool-read PR and can be rebased onto upstream
-main after that PR merges. The tools branch is independent. No live lock
-operation is performed by the offline tests.
+The branches are stacked: tools → pool read → refill. Each feature can be
+reviewed against its parent branch, and rebased onto upstream main as its
+dependencies merge. No live lock operation is performed by the offline tests.
+
+For installation and physical-lock validation, see [TESTING.md](TESTING.md).
