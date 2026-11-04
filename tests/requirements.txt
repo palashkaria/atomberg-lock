@@ -1,0 +1,2 @@
+pycryptodome>=3.18.0
+voluptuous>=0.13.1

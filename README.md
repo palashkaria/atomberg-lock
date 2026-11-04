@@ -236,3 +236,26 @@ reviewed against its parent branch, and rebased onto upstream main as its
 dependencies merge. No live lock operation is performed by the offline tests.
 
 For installation and physical-lock validation, see [TESTING.md](TESTING.md).
+
+## OTP controls in the Home Assistant UI (beta 2)
+
+After installing v1.0.2-beta.2 and restarting Home Assistant, open Settings →
+Devices & services → Atomberg Lock → Configure (the gear icon on your lock's
+integration entry). Choose **Read OTP pool** or **Refill OTPs**. Refill asks for
+1–10 codes, defaulting to one. The result dialog displays each returned slot
+and code as selectable text; copy what you need before returning to the menu.
+Empty pools and connection/refill failures have dedicated messages. Connection
+settings remain available in the same menu.
+
+No dashboard card, YAML, or Developer Tools action is required. These controls
+are in the integration's Configure dialog, not the device-page Controls panel.
+Codes are not written to integration options, sensors, or persistent result
+storage. Keep the dialog private. Existing Developer Tools actions still work.
+
+The owner confirmed refill and pool read-back work on their physical lock.
+First-use acceptance, second-use rejection, expiry, and capacity still need
+validation. Native UI rendering on the owner's Home Assistant is the beta test.
+
+Offline checks: `pip install -r tests/requirements.txt`, then
+`python -m unittest discover -s tests` and
+`python -m unittest discover -s tools -p 'test_*.py'`.

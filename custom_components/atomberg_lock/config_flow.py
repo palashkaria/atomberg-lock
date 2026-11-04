@@ -10,6 +10,7 @@ from homeassistant.core import callback
 
 from .const import CONF_LOCK_MAC, CONF_LOCK_SALT, CONF_STATIC_MASTER_KEY, DOMAIN, NAME
 from .protocol import AtombergProtocol
+from .otp_options import OTPOptionsMixin
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,8 +60,8 @@ async def _async_validate_lock_credentials(
         await protocol.disconnect()
 
 
-class AtombergOptionsFlowHandler(config_entries.OptionsFlow):
-    async def async_step_init(self, user_input=None):
+class AtombergOptionsFlowHandler(OTPOptionsMixin, config_entries.OptionsFlow):
+    async def async_step_connection(self, user_input=None):
         errors = {}
         entry = self.config_entry
 
@@ -106,7 +107,7 @@ class AtombergOptionsFlowHandler(config_entries.OptionsFlow):
         default_salt = user_input.get(CONF_LOCK_SALT, current_salt) if user_input else current_salt
 
         return self.async_show_form(
-            step_id="init",
+            step_id="connection",
             data_schema=vol.Schema({
                 vol.Required(CONF_LOCK_MAC, default=default_mac): str,
                 vol.Required(CONF_STATIC_MASTER_KEY, default=default_key): str,

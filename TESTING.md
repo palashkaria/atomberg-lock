@@ -1,7 +1,19 @@
 # OTP test build
 
-Use branch `feat/otp-refill`: it includes capture tools, OTP pool reading, and
-OTP refill. Timed PIN generation is not included.
+Use beta `v1.0.2-beta.2` from branch `feat/otp-ui`: it includes the tools, pool
+reading, refill, and native options UI. Timed PIN generation is not included.
+
+## Install through HACS
+
+Open your fork in HACS, choose Redownload, and select v1.0.2-beta.2 (enable
+prereleases if needed). Restart Home Assistant, then open Settings → Devices &
+services → Atomberg Lock → Configure. Read OTP pool and Refill OTPs are in that
+menu. Results display all returned slots and codes. Start with a one-code refill.
+The original connection-settings form is available under Connection settings.
+The Developer Tools procedures below remain available as an alternative.
+
+The owner has confirmed hardware refill and read-back through Developer Tools.
+For this beta, verify the UI and then the first/second-use code behavior.
 
 ## Install manually
 
