@@ -1,6 +1,8 @@
 """Atomberg Lock integration."""
 from __future__ import annotations
 
+import logging
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
@@ -9,12 +11,20 @@ from .coordinator import AtombergCoordinator
 from .services import register_services
 
 
+_LOGGER = logging.getLogger(__name__)
+
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     hass.data.setdefault(DOMAIN, {})
     register_services(hass)
+    if "frontend" in hass.config.components:
+        try:
+            from .frontend import async_register_card
+            await async_register_card(hass)
+        except Exception:
+            _LOGGER.exception("Could not register the optional OTP dashboard card")
     return True
 
 

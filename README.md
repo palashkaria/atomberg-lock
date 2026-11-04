@@ -259,3 +259,51 @@ validation. Native UI rendering on the owner's Home Assistant is the beta test.
 Offline checks: `pip install -r tests/requirements.txt`, then
 `python -m unittest discover -s tests` and
 `python -m unittest discover -s tools -p 'test_*.py'`.
+
+## Dashboard card (beta 3)
+
+The integration bundles and automatically loads **Atomberg OTP**, a custom card.
+No separate HACS frontend install or manual file upload is needed. Install
+v1.0.2-beta.3, restart Home Assistant, and refresh/reopen the frontend.
+
+On an editable dashboard: Edit dashboard → Add card → search **Atomberg OTP**.
+Choose your Atomberg lock in the visual editor and save. Read OTPs displays all
+returned slots/codes; Refill OTPs writes the chosen count (default one) and shows
+verified results. Existing lock/unlock cards can stay next to this card.
+
+The automatically generated Home/Overview dashboard has different editing
+limits from a user-managed dashboard. If it has no Add card option, create an
+editable dashboard under Settings → Dashboards → Add dashboard, then add this
+card there. You can make your new dashboard the default afterward. Do not replace
+or take over the automatic Overview just to add OTP controls.
+
+If the card is missing from the picker after refreshing, add a dashboard
+JavaScript module resource for `/atomberg_lock/atomberg-otp-card.js?v=1.0.2-beta.3`
+and refresh again. The normal path loads it automatically; do not add duplicate
+resources when it is already available.
+
+Optional manual card configuration:
+
+```yaml
+type: custom:atomberg-otp-card
+entity: lock.YOUR_ATOMBERG_LOCK
+```
+
+OTP actions require an administrator, as in the existing integration. Codes
+stay in card memory, never in card configuration, local storage, or sensor
+history. Clear codes hides them immediately; the card also clears after two
+minutes, when the browser page is hidden, when the card disconnects, or when the
+signed-in user changes. Refill failures are never retried automatically. Read
+the pool again after consuming a code; the card does not poll or reserve codes.
+No Remote Timed PIN support is included in this beta.
+
+Dashboard DOM checks (no real lock commands):
+
+```sh
+npm install --prefix /tmp/atomberg-card-tests --no-save --package-lock=false jsdom@26.1.0
+NODE_PATH=/tmp/atomberg-card-tests/node_modules node --test tests/test_dashboard.cjs
+```
+
+DOM behavior, syntax, and Python checks are automated. A synthetic browser preview
+could not be completed in the development session because computer access was
+unavailable; the live dashboard's layout/registration still need owner testing.
