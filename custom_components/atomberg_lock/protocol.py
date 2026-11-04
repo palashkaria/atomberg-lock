@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 
 from .const import COMMAND_TIMEOUT, NOTIFY_UUID, WRITE_UUID
 from .crypto import crc16_modbus_be, decrypt_ecb, encrypt_ecb
+from .otp import OTPProtocolMixin
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -206,7 +207,7 @@ def parse_log_record(rec: bytes, slot_mappings: dict[int, str] | None = None) ->
     }
 
 
-class AtombergProtocol:
+class AtombergProtocol(OTPProtocolMixin):
     def __init__(self, ble_target, master_key: bytes, lock_salt: bytes, on_live_event=None):
         self.ble_target = ble_target
         self.master_key = master_key

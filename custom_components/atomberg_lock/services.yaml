@@ -1,0 +1,7 @@
+get_remote_otps:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: atomberg_lock

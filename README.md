@@ -179,3 +179,29 @@ To update the MAC, Master Key, or Salt without deleting the integration:
 ## Disclaimer
 
 This project is an independent reverse-engineered implementation and is not affiliated with or endorsed by Atomberg Technologies. Use at your own risk.
+
+## Experimental remote OTP pool action
+
+`atomberg_lock.get_remote_otps` reads the lock's existing type-2 six-digit
+credentials, matching the observed iOS Remote OTP exchange. It requires an
+administrator and a working Home Assistant Bluetooth connection to the lock.
+The phone does not need a direct Bluetooth connection when calling this action.
+
+In Developer Tools → Actions, select **Read remote OTP pool (experimental)**,
+choose your lock integration entry, and perform the action with response data.
+The response is `{"otps": [{"slot": 12, "code": "123456"}]}` (example only).
+
+This action reads codes; it does not generate, reserve, or consume them. Repeated
+calls can return the same codes. Their remaining uses and expiry are not yet
+decoded. Timed PIN generation and Atomberg cloud synchronization are not included.
+Codes are returned only in the action response, not in entity states or integration
+storage. Home Assistant automation traces may retain action responses, so avoid
+recording or sharing traces containing codes.
+
+Close the official app before querying the lock to avoid Bluetooth contention.
+An empty or previously unseen firmware response raises an error rather than
+silently returning an incomplete pool. Protocol tests use synthetic credentials:
+
+```sh
+python -m unittest discover -s tests
+```

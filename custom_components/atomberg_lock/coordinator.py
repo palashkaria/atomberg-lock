@@ -191,6 +191,19 @@ class AtombergCoordinator:
             on_live_event=self.handle_live_event_packet,
         )
 
+    async def async_get_remote_otps(self) -> list[dict]:
+        """Return pool data only to the caller, without publishing entity state."""
+        async with self._busy:
+            protocol = AtombergProtocol(self._get_ble_target(), self.master_key, self.lock_salt)
+            try:
+                await protocol.connect()
+                await protocol.authenticate()
+                return await protocol.get_remote_otps()
+            except Exception as err:
+                raise HomeAssistantError("Failed to read the OTP pool") from err
+            finally:
+                await protocol.disconnect()
+
     async def async_fetch_battery(self) -> int | None:
         async with self._busy:
             protocol = self._create_protocol()

@@ -13,5 +13,17 @@
     "error": {
       "invalid_static_key": "The static key must be exactly 16 UTF-8 bytes."
     }
+  },
+  "services": {
+    "get_remote_otps": {
+      "name": "Read remote OTP pool (experimental)",
+      "description": "Read existing codes via Home Assistant Bluetooth. Does not generate, reserve, or consume codes. Codes appear in the action response.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Lock",
+          "description": "The Atomberg integration instance to query."
+        }
+      }
+    }
   }
 }
