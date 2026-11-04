@@ -205,3 +205,32 @@ silently returning an incomplete pool. Protocol tests use synthetic credentials:
 ```sh
 python -m unittest discover -s tests
 ```
+
+### Experimental OTP refill
+
+`atomberg_lock.refill_otps` provisions new random six-digit codes, using the
+credential layout observed during the iOS app's Refill OTP operation. Select
+**Refill OTP pool (experimental)** in Developer Tools → Actions, select the lock,
+and start with `count: 1`. The response returns the new `slot` and `code` only
+after a write acknowledgement and matching pool read-back.
+
+The per-call limit is ten codes; this is an integration limit, not a known
+firmware pool capacity. Refilling does not update the Atomberg cloud/app pool.
+Do not automatically retry a failed refill: earlier writes, including a write
+whose acknowledgement was lost, may already have succeeded. First read the
+pool and compare it with the pre-refill result.
+
+This implementation follows observed credential type and flags. Hardware tests
+must still establish that a code works once and is rejected on second use,
+and determine expiry and pool limits. Do not rely on these codes for guest
+access until those tests pass. No timed PIN support is implied.
+
+Development branches:
+
+- `tools/ios-capture-analysis`: standalone capture analyser, no runtime changes.
+- `feat/remote-otp-pool`: read action, based directly on upstream main.
+- `feat/otp-refill`: refill action, based on `feat/remote-otp-pool`.
+
+The refill PR will depend on the pool-read PR and can be rebased onto upstream
+main after that PR merges. The tools branch is independent. No live lock
+operation is performed by the offline tests.

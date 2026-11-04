@@ -62,5 +62,56 @@ class OTPTests(unittest.IsolatedAsyncioTestCase):
             otp.parse_otp_record(b'bad')
 
 
+class RefillTests(unittest.IsolatedAsyncioTestCase):
+    async def test_refill_writes_captured_layout_and_requires_read_back(self):
+        wire = Wire(b'TEST' + bytes.fromhex('050017010003e9000c000c0000'))
+        wire.get_remote_otps = AsyncMock(side_effect=[[], [{'slot': 12, 'code': '123456'}]])
+        from unittest.mock import patch
+        with patch.object(otp.time, 'time', return_value=0x12345678), patch('secrets.randbelow', return_value=23456):
+            self.assertEqual(await wire.refill_otps(), [{'slot': 12, 'code': '123456'}])
+        expected = (b'TEST' + bytes.fromhex('050017000303e9000c02000003e9')
+                    + b'123456' + bytes(6) + bytes.fromhex('12345678')
+                    + bytes(4) + bytes.fromhex('ffffffff') + bytes(5) + b'\x01')
+        self.assertEqual(wire._execute_step.call_args.args[0], expected)
+        self.assertEqual(wire.get_remote_otps.await_count, 2)
+
+    async def test_lost_ack_is_not_retried_or_reported_as_success(self):
+        wire = Wire(None)
+        wire.get_remote_otps = AsyncMock(return_value=[])
+        wire._execute_step.side_effect = TimeoutError()
+        with self.assertRaisesRegex(RuntimeError, '0 of 2.*unacknowledged'):
+            await wire.refill_otps(2)
+        self.assertEqual(wire._execute_step.await_count, 1)
+
+    async def test_missing_read_back_rejects_acknowledged_write(self):
+        wire = Wire(b'TEST' + bytes.fromhex('050017010003e9000c000c0000'))
+        wire.get_remote_otps = AsyncMock(return_value=[])
+        with self.assertRaisesRegex(RuntimeError, '1 of 1'):
+            await wire.refill_otps()
+
+    async def test_invalid_counts_do_not_contact_lock(self):
+        wire = Wire(None)
+        wire.get_remote_otps = AsyncMock()
+        for count in (0, 11, -1, True, 1.5):
+            with self.assertRaises(ValueError):
+                await wire.refill_otps(count)
+        wire.get_remote_otps.assert_not_awaited()
+
+    async def test_wrong_sequence_and_failure_status_are_not_accepted(self):
+        for fields in ('0600170100', '0500170000'):
+            wire = Wire(b'TEST' + bytes.fromhex(fields + '03e9000c000c0000'))
+            wire.get_remote_otps = AsyncMock(return_value=[])
+            with self.assertRaisesRegex(RuntimeError, '0 of 1'):
+                await wire.refill_otps()
+
+    async def test_partial_batch_stops_at_first_failed_write(self):
+        wire = Wire(None)
+        wire.get_remote_otps = AsyncMock(return_value=[])
+        wire._execute_step.side_effect = [b'TEST' + bytes.fromhex('050017010003e9000c000c0000'), TimeoutError()]
+        with self.assertRaisesRegex(RuntimeError, '1 of 3'):
+            await wire.refill_otps(3)
+        self.assertEqual(wire._execute_step.await_count, 2)
+
+
 if __name__ == '__main__':
     unittest.main()

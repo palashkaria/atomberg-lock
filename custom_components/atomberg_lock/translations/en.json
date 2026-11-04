@@ -24,6 +24,20 @@
           "description": "The Atomberg integration instance to query."
         }
       }
+    },
+    "refill_otps": {
+      "name": "Refill OTP pool (experimental)",
+      "description": "Write random six-digit credentials to the lock and verify by reading them back. Does not synchronize the Atomberg app. One-time use requires hardware validation. Do not automatically retry on failure.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Lock",
+          "description": "The Atomberg integration instance to refill."
+        },
+        "count": {
+          "name": "Number of codes",
+          "description": "Start with one code for hardware validation. The firmware pool capacity is unknown."
+        }
+      }
     }
   }
 }

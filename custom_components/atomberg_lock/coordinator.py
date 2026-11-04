@@ -204,6 +204,22 @@ class AtombergCoordinator:
             finally:
                 await protocol.disconnect()
 
+    async def async_refill_otps(self, count: int) -> list[dict]:
+        """Serialize OTP writes with all other lock operations."""
+        async with self._busy:
+            protocol = AtombergProtocol(self._get_ble_target(), self.master_key, self.lock_salt)
+            try:
+                await protocol.connect()
+                await protocol.authenticate()
+                return await protocol.refill_otps(count)
+            except Exception as err:
+                raise HomeAssistantError(
+                    "OTP refill failed or is incomplete. Read the pool before retrying; "
+                    "the lock may have accepted some codes."
+                ) from err
+            finally:
+                await protocol.disconnect()
+
     async def async_fetch_battery(self) -> int | None:
         async with self._busy:
             protocol = self._create_protocol()

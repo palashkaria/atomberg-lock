@@ -5,3 +5,18 @@ get_remote_otps:
       selector:
         config_entry:
           integration: atomberg_lock
+refill_otps:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: atomberg_lock
+    count:
+      default: 1
+      selector:
+        number:
+          min: 1
+          max: 10
+          step: 1
+          mode: box
